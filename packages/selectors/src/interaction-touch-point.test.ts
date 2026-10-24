@@ -311,3 +311,16 @@ test('property: touch-point resolution is invariant to node-array permutations',
     { numRuns: PROPERTY_RUNS },
   );
 });
+
+test('zero-width or zero-height targets resolve as invalid instead of their origin', () => {
+  for (const rect of [
+    { x: 0, y: 0, width: 0, height: 0 },
+    { x: 10, y: 20, width: 0, height: 40 },
+    { x: 10, y: 20, width: 40, height: 0 },
+  ]) {
+    const nodes = makeSnapshotState([
+      { index: 0, depth: 0, type: 'Icon', label: 'Clock', rect },
+    ]).nodes;
+    assert.deepEqual(resolveInteractionTouchPoint(nodes, nodes[0]!), { kind: 'invalid' });
+  }
+});

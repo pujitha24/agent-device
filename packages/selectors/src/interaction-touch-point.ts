@@ -35,7 +35,9 @@ export function resolveInteractionTouchPoint(
 ): InteractionTouchPointResolution {
   const targetRect = normalizeRect(node.rect);
   const center = resolveRectCenter(targetRect ?? undefined);
-  if (!targetRect || !center) return { kind: 'invalid' };
+  if (!targetRect || !center || targetRect.width === 0 || targetRect.height === 0) {
+    return { kind: 'invalid' };
+  }
 
   const competitors = collectInteractiveDescendantRects(nodes, node, targetRect);
   if (competitors.length === 0) {

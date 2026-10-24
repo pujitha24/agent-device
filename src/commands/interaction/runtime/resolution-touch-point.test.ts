@@ -79,3 +79,40 @@ test('runtime ref and selector paths dispatch the same parent-owned post point',
   assert.ok(refCalls[0]!.y < 292);
   assert.notDeepEqual(refCalls[0], { x: 201, y: 440 });
 });
+
+test('runtime selector press refuses a zero-area target without dispatching a tap', async () => {
+  const calls: Point[] = [];
+  const device = createInteractionDevice(
+    makeSnapshotState([
+      {
+        index: 0,
+        depth: 0,
+        type: 'Application',
+        rect: { x: 0, y: 0, width: 402, height: 874 },
+        hittable: true,
+      },
+      {
+        index: 1,
+        depth: 1,
+        parentIndex: 0,
+        type: 'Icon',
+        label: 'Clock',
+        rect: { x: 0, y: 0, width: 0, height: 0 },
+        hittable: false,
+      },
+    ]),
+    {
+      tap: async (_context, point) => {
+        calls.push(point);
+        return { ok: true };
+      },
+    },
+  );
+
+  await assert.rejects(
+    device.interactions.click(selector('label="Clock"'), { session: 'default' }),
+    (error: unknown) =>
+      (error as { details?: { reason?: string } }).details?.reason === 'target_bounds_invalid',
+  );
+  assert.deepEqual(calls, []);
+});
